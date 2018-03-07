@@ -1,0 +1,189 @@
+SQL> /*-------------------------------------Task 2-------------------------------------*/
+SQL> SET ECHO ON
+SQL> SET FEEDBACK ON
+SQL> SET LINESIZE 100
+SQL> SET PAGESIZE 100
+SQL> 
+SQL> CREATE TABLE UserChoice (
+  2  p# 	     NUMBER (8) 	     NOT NULL,
+  3  price   NUMBER (7,2)    NOT NULL,
+  4  	     CONSTRAINT UserChoice_PK PRIMARY KEY (p#),
+  5  	     CONSTRAINT UserChoice_FK1 FOREIGN KEY (p#) REFERENCES Product (p#)
+  6  );
+
+Table created.
+
+SQL> 
+SQL> CREATE OR REPLACE PROCEDURE FindProducts (category IN VARCHAR, key_word IN VARCHAR) IS
+  2  BEGIN
+  3  	     IF upper (category) = 'BOOK' THEN
+  4  		     FOR brec IN (   SELECT P.p#, P.price FROM Product P, Book B, Keyword K
+  5  						     WHERE P.p# = B.p# AND B.p# = K.p#
+  6  						     AND upper (K.kword) = upper (key_word))
+  7  		     LOOP
+  8  			     INSERT INTO UserChoice VALUES (brec.p#, brec.price);
+  9  		     END LOOP;
+ 10  
+ 11  	     ELSIF upper (category) = 'VIDEO' THEN
+ 12  		     FOR vrec IN (   SELECT P.p#, P.price FROM Product P, Video V, Keyword K
+ 13  						     WHERE P.p# = V.p# AND V.p# = K.p#
+ 14  						     AND upper (K.kword) = upper (key_word))
+ 15  		     LOOP
+ 16  			     INSERT INTO UserChoice VALUES (vrec.p#, vrec.price);
+ 17  		     END LOOP;
+ 18  	     ELSIF upper (category) = 'CDROM' THEN
+ 19  		     FOR cdrec IN (  SELECT P.p#, P.price FROM Product P, CDROM CD, Keyword K
+ 20  						     WHERE P.p# = CD.p# AND CD.p# = K.p#
+ 21  						     AND upper (K.kword) = upper (key_word))
+ 22  		     LOOP
+ 23  			     INSERT INTO UserChoice VALUES (cdrec.p#, cdrec.price);
+ 24  		     END LOOP;
+ 25  	     END IF;
+ 26  
+ 27  END FindProducts;
+ 28  /
+
+Procedure created.
+
+SQL> 
+SQL> --Product Table
+SQL> SELECT p#, price FROM Product;
+
+        P#      PRICE                                                                               
+---------- ----------                                                                               
+         1      23.95                                                                               
+         2         50                                                                               
+         3        5.9                                                                               
+         4      49.95                                                                               
+         5       8.95                                                                               
+         6          5                                                                               
+         7       25.3                                                                               
+         8      12.56                                                                               
+         9      10.05                                                                               
+        10         15                                                                               
+
+10 rows selected.
+
+SQL> 
+SQL> --Book Table
+SQL> SELECT p# FROM Book;
+
+        P#                                                                                          
+----------                                                                                          
+         1                                                                                          
+         2                                                                                          
+         3                                                                                          
+
+3 rows selected.
+
+SQL> 
+SQL> --Video Table
+SQL> SELECT p# FROM Video;
+
+        P#                                                                                          
+----------                                                                                          
+        10                                                                                          
+
+1 row selected.
+
+SQL> 
+SQL> --CDROM Table
+SQL> SELECT p# FROM CDROM;
+
+        P#                                                                                          
+----------                                                                                          
+         7                                                                                          
+         8                                                                                          
+         9                                                                                          
+
+3 rows selected.
+
+SQL> 
+SQL> --Keyword Table
+SQL> SELECT * FROM Keyword;
+
+        P# KWORD                                                                                    
+---------- ------------------------------                                                           
+         1 FLOWER                                                                                   
+         1 GARDENING                                                                                
+         1 COLOUR                                                                                   
+         2 UNIX                                                                                     
+         2 OPERATING SYSTEM                                                                         
+         3 SQL                                                                                      
+         4 DATABASE                                                                                 
+         4 SQL                                                                                      
+         7 OVERTURE                                                                                 
+         8 SYMPHONY                                                                                 
+         9 SYMPHONY                                                                                 
+         9 ORCHESTRA                                                                                
+        10 VOYAGER                                                                                  
+        10 STARSHIP                                                                                 
+
+14 rows selected.
+
+SQL> 
+SQL> --Empty Table
+SQL> SELECT * FROM UserChoice;
+
+no rows selected
+
+SQL> 
+SQL> exec FindProducts ('Book', 'UNIX');
+
+PL/SQL procedure successfully completed.
+
+SQL> SELECT * FROM UserChoice;
+
+        P#      PRICE                                                                               
+---------- ----------                                                                               
+         2         50                                                                               
+
+1 row selected.
+
+SQL> 
+SQL> exec FindProducts ('Video', 'Voyager');
+
+PL/SQL procedure successfully completed.
+
+SQL> SELECT * FROM UserChoice;
+
+        P#      PRICE                                                                               
+---------- ----------                                                                               
+         2         50                                                                               
+        10         15                                                                               
+
+2 rows selected.
+
+SQL> 
+SQL> --There are no products that fit this description
+SQL> exec FindProducts ('Book', 'Voyager');
+
+PL/SQL procedure successfully completed.
+
+SQL> SELECT * FROM UserChoice;
+
+        P#      PRICE                                                                               
+---------- ----------                                                                               
+         2         50                                                                               
+        10         15                                                                               
+
+2 rows selected.
+
+SQL> 
+SQL> exec FindProducts ('cdrom', 'Symphony');
+
+PL/SQL procedure successfully completed.
+
+SQL> SELECT * FROM UserChoice;
+
+        P#      PRICE                                                                               
+---------- ----------                                                                               
+         2         50                                                                               
+        10         15                                                                               
+         8      12.56                                                                               
+         9      10.05                                                                               
+
+4 rows selected.
+
+SQL> 
+SQL> SPOOL OFF

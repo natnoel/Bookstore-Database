@@ -1,0 +1,137 @@
+SQL> /*==========================Task 1==========================*/
+SQL> SET ECHO ON
+SQL> SET FEEDBACK ON
+SQL> SET LINESIZE 100
+SQL> SET PAGESIZE 100
+SQL> 
+SQL> SELECT p#, price FROM Product;
+
+        P#      PRICE                                                                               
+---------- ----------                                                                               
+         1      23.95                                                                               
+         2         50                                                                               
+         3        5.9                                                                               
+         4      49.95                                                                               
+         5       8.95                                                                               
+         6          5                                                                               
+         7       25.3                                                                               
+         8      12.56                                                                               
+         9      10.05                                                                               
+        10         15                                                                               
+
+10 rows selected.
+
+SQL> SELECT p# FROM Book;
+
+        P#                                                                                          
+----------                                                                                          
+         1                                                                                          
+         2                                                                                          
+         3                                                                                          
+
+3 rows selected.
+
+SQL> SELECT p# FROM Video;
+
+        P#                                                                                          
+----------                                                                                          
+        10                                                                                          
+
+1 row selected.
+
+SQL> SELECT * FROM PP;
+
+WHENFINAL         P#                                                                                
+--------- ----------                                                                                
+12-APR-11          2                                                                                
+08-MAY-11          5                                                                                
+08-MAY-11          6                                                                                
+08-MAY-11          3                                                                                
+08-MAY-11          2                                                                                
+16-JAN-11          2                                                                                
+16-JAN-11          7                                                                                
+16-JAN-11          8                                                                                
+16-JAN-11          9                                                                                
+16-JAN-11         10                                                                                
+
+10 rows selected.
+
+SQL> 
+SQL> BEGIN
+  2  	     UPDATE Product
+  3  	     SET price = price * 0.97
+  4  	     WHERE p# IN
+  5  	     (	     SELECT p# FROM Book
+  6  		     WHERE p# NOT IN
+  7  		     (	     SELECT p# FROM PP
+  8  			     WHERE (SYSDATE - whenfinalised) <= 30));
+  9  
+ 10  	     UPDATE Product
+ 11  	     SET price = price * 0.95
+ 12  	     WHERE p# IN
+ 13  	     (	     SELECT p# FROM Video
+ 14  		     WHERE p# NOT IN
+ 15  		     (	     SELECT p# FROM PP
+ 16  			     WHERE (SYSDATE - whenfinalised) <= 20
+ 17  			     GROUP BY p#
+ 18  			     HAVING count (*) >= 5));
+ 19  END;
+ 20  /
+
+PL/SQL procedure successfully completed.
+
+SQL> 
+SQL> SELECT p#, price FROM Product;
+
+        P#      PRICE                                                                               
+---------- ----------                                                                               
+         1      23.23                                                                               
+         2       48.5                                                                               
+         3       5.72                                                                               
+         4      49.95                                                                               
+         5       8.95                                                                               
+         6          5                                                                               
+         7       25.3                                                                               
+         8      12.56                                                                               
+         9      10.05                                                                               
+        10      14.25                                                                               
+
+10 rows selected.
+
+SQL> SELECT p# FROM Book;
+
+        P#                                                                                          
+----------                                                                                          
+         1                                                                                          
+         2                                                                                          
+         3                                                                                          
+
+3 rows selected.
+
+SQL> SELECT p# FROM Video;
+
+        P#                                                                                          
+----------                                                                                          
+        10                                                                                          
+
+1 row selected.
+
+SQL> SELECT * FROM PP;
+
+WHENFINAL         P#                                                                                
+--------- ----------                                                                                
+12-APR-11          2                                                                                
+08-MAY-11          5                                                                                
+08-MAY-11          6                                                                                
+08-MAY-11          3                                                                                
+08-MAY-11          2                                                                                
+16-JAN-11          2                                                                                
+16-JAN-11          7                                                                                
+16-JAN-11          8                                                                                
+16-JAN-11          9                                                                                
+16-JAN-11         10                                                                                
+
+10 rows selected.
+
+SQL> 
+SQL> SPOOL OFF

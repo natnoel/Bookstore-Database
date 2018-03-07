@@ -1,0 +1,71 @@
+SQL> /*-------------------------------------Task 3-------------------------------------*/
+SQL> SET ECHO ON
+SQL> SET FEEDBACK ON
+SQL> SET LINESIZE 100
+SQL> SET PAGESIZE 100
+SQL> 
+SQL> CREATE OR REPLACE TRIGGER verify_creditcard
+  2  BEFORE INSERT ON Pbasket
+  3  FOR EACH ROW
+  4  
+  5  DECLARE
+  6  	     other_users     NUMBER (3);
+  7  BEGIN
+  8  	     SELECT count (*)
+  9  	     INTO other_users
+ 10  	     FROM Pbasket
+ 11  	     WHERE :NEW.ccard = ccard
+ 12  	     AND     :NEW.c# <> c#;
+ 13  
+ 14  	     IF other_users <> 0 THEN
+ 15  		     RAISE_APPLICATION_ERROR (-20001, 'Credit card number '||:NEW.ccard||' already in use by another customer! Insertion aborted!');
+ 16  	     END IF;
+ 17  END;
+ 18  /
+
+Trigger created.
+
+SQL> 
+SQL> SELECT * FROM Pbasket;
+
+WHENCREAT WHENFINAL      CCARD         C#                                                           
+--------- --------- ---------- ----------                                                           
+02-APR-11 02-APR-11 4594567829        100                                                           
+12-APR-11 12-APR-11 1294522229        101                                                           
+08-MAY-11 08-MAY-11 1294522229        101                                                           
+16-JAN-11 16-JAN-11 6781394229        102                                                           
+
+4 rows selected.
+
+SQL> 
+SQL> --Valid credit card
+SQL> INSERT INTO Pbasket VALUES ('25-DEC-2011', '25-DEC-2011', 7777777777, 100);
+
+1 row created.
+
+SQL> 
+SQL> --Invalid credit card
+SQL> INSERT INTO Pbasket VALUES ('17-DEC-2011', '17-DEC-2011', 6781394229, 100);
+INSERT INTO Pbasket VALUES ('17-DEC-2011', '17-DEC-2011', 6781394229, 100)
+            *
+ERROR at line 1:
+ORA-20001: Credit card number 6781394229 already in use by another customer! Insertion aborted! 
+ORA-06512: at "LEON.VERIFY_CREDITCARD", line 11 
+ORA-04088: error during execution of trigger 'LEON.VERIFY_CREDITCARD' 
+
+
+SQL> 
+SQL> SELECT * FROM Pbasket;
+
+WHENCREAT WHENFINAL      CCARD         C#                                                           
+--------- --------- ---------- ----------                                                           
+02-APR-11 02-APR-11 4594567829        100                                                           
+12-APR-11 12-APR-11 1294522229        101                                                           
+08-MAY-11 08-MAY-11 1294522229        101                                                           
+16-JAN-11 16-JAN-11 6781394229        102                                                           
+25-DEC-11 25-DEC-11 7777777777        100                                                           
+
+5 rows selected.
+
+SQL> 
+SQL> SPOOL OFF;

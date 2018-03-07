@@ -1,0 +1,12 @@
+DROP TABLE CDROM;
+DROP TABLE Video;
+DROP TABLE Jissue;
+DROP TABLE Journal;
+DROP TABLE PP;
+DROP TABLE Pbasket;
+DROP TABLE Author;
+DROP TABLE Book;
+DROP TABLE Keyword;
+DROP TABLE Cevaluation;
+DROP TABLE Product;
+DROP TABLE Customer;
